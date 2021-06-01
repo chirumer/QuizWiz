@@ -1,6 +1,9 @@
+(function(){
+
 const server_config = require('./server-data/config.json');
 
 const path = require('path');
+const fetch = require('node-fetch');
 
 const express = require('express');
 const app = express();
@@ -23,8 +26,8 @@ const pages = quiz_pages.concat(
 );
 
 quiz_pages.forEach(page => {
-    app.use('/'+page, (req, res, next) => {
-	if (is_open(server_config.is_open_url)) {
+    app.use('/'+page, async (req, res, next) => {
+	if (await is_open(server_config.is_open_url)) {
 	    next();
 	    return;
 	}
@@ -42,7 +45,10 @@ app.listen(PORT, () => {
     console.log(`Listening on ${PORT}`);
 });
 
-function is_open(url) {
-    // perform GET at url to check if quiz open
-    return true;
+async function is_open(url) {
+    response = await fetch(url);
+    data = await response.json();
+    return data.is_open;
 }
+
+})();
