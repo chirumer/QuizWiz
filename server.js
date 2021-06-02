@@ -9,16 +9,15 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.static('public'));
-
 app.get('/', (req, res) => {
     res.redirect('/instructions');
 });
 
 const quiz_pages = [
     'instructions',
+    'registration',
     'quiz',
-    'results'
+    'results',
 ];
 
 const pages = quiz_pages.concat(
@@ -27,19 +26,21 @@ const pages = quiz_pages.concat(
 
 quiz_pages.forEach(page => {
     app.use('/'+page, async (req, res, next) => {
-	if (await is_open(server_config.is_open_url)) {
-	    next();
-	    return;
-	}
-	res.redirect('/closed');
+        if (await is_open(server_config.is_open_url)) {
+            next();
+            return;
+        }
+        res.redirect('/closed');
     });
 });
 
 pages.forEach(page => {
     app.get('/'+page, (req, res) => {
-	res.sendFile(path.join(__dirname, '/'+page+'/index.html'));
+        res.sendFile(path.join(__dirname, '/public/'+page+'/index.html'));
     });
 });
+
+app.use(express.static('public'));
 
 app.listen(PORT, () => {
     console.log(`Listening on ${PORT}`);
@@ -47,8 +48,8 @@ app.listen(PORT, () => {
 
 async function is_open(url) {
     response = await fetch(url);
-    data = await response.json();
-    return data.is_open;
+    const { is_open }  = await response.json();
+    return is_open;
 }
 
 })();
