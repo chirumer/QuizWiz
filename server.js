@@ -3,6 +3,7 @@
 const server_config = require('./server-data/config.json');
 const questions = jumble_questions(require('./server-data/questions.json'));
 const no_of_questions = questions.length;
+console.log(questions);
 
 const path = require('path');
 const fetch = require('node-fetch');
@@ -90,7 +91,28 @@ async function is_open(url) {
 }
 
 function jumble_questions(questions) {
-    return questions; // will implement later
+    questions.forEach(question  => {
+        shuffle_array(question.options);
+    });
+    shuffle_array(questions);
+
+    return questions;
+}
+
+function shuffle_array(array) {
+    let current_index = array.length - 1;
+    while (current_index) {
+        const random_index = Math.floor(
+            Math.random() * (current_index+1)
+        );
+        
+        [array[current_index], array[random_index]] = [
+            array[random_index], array[current_index]
+        ];
+
+        --current_index;
+    }
+    return array;
 }
 
 })();
