@@ -1,8 +1,8 @@
-const { response } = require('express');
-
 (function(){
 
 const server_config = require('./server-data/config.json');
+const questions = jumble_questions(require('./server-data/questions.json'));
+const no_of_questions = questions.length;
 
 const path = require('path');
 const fetch = require('node-fetch');
@@ -34,9 +34,10 @@ const quiz_pages = [
     'results'
 ];
 
-const pages = quiz_pages.concat(
-    [ 'closed' ]
-);
+const pages = [
+    ...quiz_pages,
+    'closed'
+];
 
 quiz_pages.forEach(page => {
     app.use('/'+page, async (req, res, next) => {
@@ -54,11 +55,27 @@ pages.forEach(page => {
     });
 });
 
+app.get('/get-question', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    const session_data = req.session;
+    session_data.question_no = session_data.question_no ?? 0;
+    if (!(session_data.question_no < no_of_questions)) {
+        res.send(JSON.stringify({ is_over: true }));
+        return;
+    }
+    const question = questions[session_data.question_no];
+    const send_data = {
+        "question": question.question,
+        "options": question.options
+    }
+    res.send(JSON.stringify(send_data));
+});
+
 app.use(express.static('public'));
 
 app.post('/register-user', (req, res) => {
     const user = req.body;
-    req.session.uer = user;
+    req.session.user = user;
     res.sendStatus(200);
 });
 
@@ -70,6 +87,10 @@ async function is_open(url) {
     const response = await fetch(url);
     const { is_open } = await response.json();
     return is_open;
+}
+
+function jumble_questions(questions) {
+    return questions; // will implement later
 }
 
 })();

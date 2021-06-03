@@ -1,4 +1,6 @@
-const register_button = document.getElementById('register_button')
+(function(){
+
+const register_button = document.getElementById('register_button');
 register_button.addEventListener('click', async () => {
     const name = document.getElementById('name').value;
     if (!name) {
@@ -20,3 +22,5 @@ register_button.addEventListener('click', async () => {
 
     window.location.assign('/quiz');
 });
+
+})();
