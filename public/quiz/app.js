@@ -17,7 +17,7 @@ submit_button.addEventListener('click', async () => {
     let selected_answer = -1;
     for (btn_index in radio_btns) {
         if (radio_btns[btn_index].checked) {
-            selected_answer = btn_index;
+            selected_answer = +btn_index;
             break;
         }
     }
@@ -35,6 +35,11 @@ submit_button.addEventListener('click', async () => {
 
     if (!response.ok) {
         console.log('could not submit answer');
+    }
+
+    const { is_timeout } = await response.json();
+    if (is_timeout) {
+        alert('this question marked as timed out');
     }
     await load_question();
 });
