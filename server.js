@@ -3,7 +3,6 @@
 const server_config = require('./server-data/config.json');
 const questions = jumble_questions(require('./server-data/questions.json'));
 const no_of_questions = questions.length;
-console.log(questions);
 
 const path = require('path');
 const fetch = require('node-fetch');
@@ -77,6 +76,11 @@ app.use(express.static('public'));
 app.post('/register-user', (req, res) => {
     const user = req.body;
     req.session.user = user;
+    res.sendStatus(200);
+});
+
+app.post('/submit-answer', (req, res) => {
+    ++req.session.question_no;
     res.sendStatus(200);
 });
 

@@ -9,11 +9,11 @@ register_button.addEventListener('click', async () => {
     const user = { name };
 
     const response = await fetch('/register-user', {
-	method: 'POST',
-	headers: {
-	    'Content-Type': 'application/json'
-	},
-	body: JSON.stringify(user)
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(user)
     });
 
     if (!response.ok) {
