@@ -1,7 +1,7 @@
 (function(){
 
 const server_config = require('./server-data/config.json');
-const questions = jumble_questions(require('./server-data/questions.json'));
+const questions = require('./server-data/questions.json');
 const no_of_questions = questions.length;
 
 const path = require('path');
@@ -92,31 +92,6 @@ async function is_open(url) {
     const response = await fetch(url);
     const { is_open } = await response.json();
     return is_open;
-}
-
-function jumble_questions(questions) {
-    questions.forEach(question  => {
-        shuffle_array(question.options);
-    });
-    shuffle_array(questions);
-
-    return questions;
-}
-
-function shuffle_array(array) {
-    let current_index = array.length - 1;
-    while (current_index) {
-        const random_index = Math.floor(
-            Math.random() * (current_index+1)
-        );
-        
-        [array[current_index], array[random_index]] = [
-            array[random_index], array[current_index]
-        ];
-
-        --current_index;
-    }
-    return array;
 }
 
 })();

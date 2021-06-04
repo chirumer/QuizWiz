@@ -14,7 +14,6 @@ submit_button.addEventListener('click', async () => {
             radio_btns.push(i);
         }
     }
-
     let selected_answer = -1;
     for (btn_index in radio_btns) {
         if (radio_btns[btn_index].checked) {
@@ -22,7 +21,6 @@ submit_button.addEventListener('click', async () => {
             break;
         }
     }
-
     if (selected_answer == -1) {
         return;
     }
