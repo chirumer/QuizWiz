@@ -76,7 +76,10 @@ app.get('/get-question', (req, res) => {
         "options": question.options,
         "time_left": time_per_question - time_grace
     }
-    session_data.timer_start = Date.now();
+    if (session_data.is_new_question) {
+        session_data.timer_start = Date.now();
+    }
+    session_data.is_new_question = false;
     res.send(JSON.stringify(send_data));
 });
 
@@ -101,6 +104,8 @@ app.post('/submit-answer', (req, res) => {
     }
 
     ++req.session.question_no;
+
+    req.session.is_new_question = true;
 
     res.setHeader('Content-Type', 'application/json');
     res.send(JSON.stringify({ is_timeout }));
