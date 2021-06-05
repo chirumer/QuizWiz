@@ -48,10 +48,6 @@ app.get('/', (req, res) => {
     res.redirect('/home');
 });
 
-app.get('/home', (req, res) => {
-    res.redirect('/instructions');
-}); // TEMPORARY
-
 const quiz_pages = [
     'registration',
     'quiz',
@@ -69,7 +65,7 @@ const pages = [
 
 quiz_pages.forEach(page => {
     app.use('/'+page, async (req, res, next) => {
-        if (await is_open(server_config.is_open_url)) {
+        if (await is_open(server_config.quiz_timing_url)) {
 	    next();
             return;
         }
@@ -122,6 +118,7 @@ app.get('/results', (req, res, next) => {
 	    time_taken += time;
 	}
     });
+    time_taken = Math.round(time_taken/1000)
 
     res.render(path.join(__dirname, '/public/results/index.pug'), {
         questions_answered,
@@ -139,8 +136,15 @@ pages.forEach(page => {
 
 app.get('/is-quiz-open', async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
-    const quiz_open = await is_open(server_config.is_open_url);
+    const quiz_open = await is_open(server_config.quiz_timing_url);
     res.send(JSON.stringify({ is_open: quiz_open })); 
+});
+
+app.get('/get-quiz-timing', async(req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    const response = await fetch(server_config.quiz_timing_url);
+    const { open_at, close_at } = await response.json();
+    res.send(JSON.stringify({ open_at, close_at }));
 });
 
 app.get('/get-question', (req, res) => {
@@ -220,8 +224,8 @@ if (!module.parent) {
 
 async function is_open(url) {
     const response = await fetch(url);
-    const { is_open } = await response.json();
-    return is_open;
+    const { open_at, close_at } = await response.json();
+    return Date.now() >= open_at && Date.now() < close_at;
 }
 
 })();
