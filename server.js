@@ -1,4 +1,4 @@
-(function(){
+(async function(){
 
 const server_config = require('./server-data/config.json');
 const quiz_settings = require('./server-data/quiz_settings.json');
@@ -10,6 +10,23 @@ const time_per_question = quiz_settings.time_per_question + time_grace;
 const path = require('path');
 const fetch = require('node-fetch');
 const session = require('express-session');
+const mongoose = require('mongoose');
+
+await mongoose.connect(server_config.connection_string, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+});
+const { Schema } = mongoose;
+const participant_schema = new Schema({
+    name: {
+	type: String,
+	lowercase: true,
+	required: true
+    },
+    answers: [Number],
+    times_taken: [Number]
+});
+const Participant = mongoose.model('participants', participant_schema);
 
 const express = require('express');
 const app = express();
@@ -128,14 +145,22 @@ app.get('*', (req, res) => {
     res.status(404).send('Not Found');
 });
 
-app.post('/register-user', (req, res) => {
+app.post('/register-user', async (req, res) => {
     const user = req.body;
     req.session.user = user;
     req.session.in_quiz = true;
+
+    const data = await Participant.create({
+	name: user.name,
+	answers: Array(no_of_questions).fill(-1),
+	times_taken: Array(no_of_questions).fill(-1)
+    });
+    req.session.db_id = data._id;
+
     res.sendStatus(200);
 });
 
-app.post('/submit-answer', (req, res) => {
+app.post('/submit-answer', async (req, res) => {
     const user_answer = req.body.answer;
     req.session.answers = req.session.answers ?? Array(no_of_questions).fill(-1);
     req.session.times_taken = req.session.times_taken ?? Array(no_of_questions).fill(-1);
@@ -145,6 +170,12 @@ app.post('/submit-answer', (req, res) => {
         req.session.answers[req.session.question_no] = user_answer;
         req.session.times_taken[req.session.question_no] = time_taken;
     }
+    await Participant.updateOne({
+	_id: req.session.db_id
+    }, {
+	answers: req.session.answers,
+	times_taken: req.session.times_taken
+    });
 
     ++req.session.question_no;
 
@@ -154,9 +185,11 @@ app.post('/submit-answer', (req, res) => {
     res.send(JSON.stringify({ is_timeout }));
 });
 
-app.listen(PORT, () => {
-    console.log(`Listening on ${PORT}`);
-});
+if (!module.parent) {
+    app.listen(PORT, () => {
+	console.log(`Listening on ${PORT}`);
+    });
+}
 
 async function is_open(url) {
     const response = await fetch(url);
