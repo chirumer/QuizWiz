@@ -118,7 +118,9 @@ app.get('/results', (req, res, next) => {
         }
     });
     req.session.times_taken.forEach(time => {
-        time_taken += time;
+        if (time_taken != -1) {
+	    time_taken += time;
+	}
     });
 
     res.render(path.join(__dirname, '/public/results/index.pug'), {
