@@ -1,10 +1,11 @@
 (function(){
 
 const server_config = require('./server-data/config.json');
+const quiz_settings = require('./server-data/quiz_settings.json');
 const questions = require('./server-data/questions.json');
 const no_of_questions = questions.length;
-const time_grace = 4 * 1000;
-const time_per_question = 20 * 1000 + time_grace;
+const time_grace = quiz_settings.time_grace;
+const time_per_question = quiz_settings.time_per_question + time_grace;
 
 const path = require('path');
 const fetch = require('node-fetch');
@@ -20,7 +21,7 @@ app.use(session({
     saveUninitialized: true,
     cookie: {
         sameSite: 'strict',
-        maxAge: 60 * 60 * 1000 // 1 hour
+        maxAge: quiz_settings.quiz_duration 
     }
 }));
 app.use(express.json());
