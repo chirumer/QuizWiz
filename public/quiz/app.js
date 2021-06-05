@@ -1,11 +1,15 @@
 (async function(){
 
+let timer_ID;
+
 const question_ele = document.getElementById('question');
 const timer_count_ele = document.getElementById('timer_count');
 const options_area_ele = document.getElementById('options_area');
 
 const submit_button = document.getElementById('submit_button');
 submit_button.addEventListener('click', async () => {
+    clearInterval(timer_ID);
+
     const options_list = document.getElementById('options_list');
 
     let radio_btns = [];
@@ -82,6 +86,22 @@ async function load_question() {
         label.setAttribute('for', `option_${index}`);
         label.textContent = option;
     });
+
+    let time_left = Math.round(data.time_left / 1000);
+    time_left = time_left > 0 ? time_left : 0;
+
+    timer_count_ele.innerText = time_left;
+    if (time_left) {
+	--time_left;
+
+	timer_ID = window.setInterval(() => {
+	    timer_count_ele.innerText = time_left;
+	    if (!time_left) {
+		clearInterval(timer_ID);
+	    }
+	    --time_left;
+	}, 950);
+    }
 }
 
 })();

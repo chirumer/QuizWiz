@@ -4,7 +4,7 @@ const server_config = require('./server-data/config.json');
 const questions = require('./server-data/questions.json');
 const no_of_questions = questions.length;
 const time_grace = 4 * 1000;
-const time_per_question = 10 * 1000 + time_grace;
+const time_per_question = 20 * 1000 + time_grace;
 
 const path = require('path');
 const fetch = require('node-fetch');
@@ -26,39 +26,76 @@ app.use(session({
 app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.redirect('/instructions');
+    res.redirect('/home');
 });
 
+app.get('/home', (req, res) => {
+    res.redirect('/instructions');
+}); // TEMPORARY
+
 const quiz_pages = [
-    'instructions',
     'registration',
     'quiz',
-    'results'
+    'results',
 ];
 
 const pages = [
     ...quiz_pages,
-    'closed'
+    'home',
+    'instructions',
+    'closed',
+    'leaderboard',
+    '404'
 ];
 
 quiz_pages.forEach(page => {
     app.use('/'+page, async (req, res, next) => {
         if (await is_open(server_config.is_open_url)) {
-            if (!req.session.in_quiz || page=='quiz') {
-                next();
-                return;
-            }
-            res.redirect('/quiz');
+	    next();
             return;
         }
         res.redirect('/closed');
     });
 });
 
+app.use('/registration', (req, res, next) => {
+    if (req.session.in_quiz) {
+	res.redirect('/quiz');
+	return;
+    }
+    else if (req.session.user) {
+	res.redirect('/results');
+	return;
+    }
+    next();
+});
+
+app.use('/quiz', (req, res, next) => {
+    if (!req.session.in_quiz) {
+	res.redirect('/');
+	return;
+    }
+    next();
+});
+
+app.use('/results', (req, res, next) => {
+    if (!req.session.user || req.session.in_quiz) {
+	res.redirect('/');
+	return;
+    }
+    next();
+});
+
 pages.forEach(page => {
     app.get('/'+page, (req, res) => {
-        res.sendFile(path.join(__dirname, '/public/'+page+'/index.html'));
+	res.sendFile(path.join(__dirname, '/public/'+page+'/index.html'));
     });
+});
+
+app.get('/is-quiz-open', async (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    const quiz_open = await is_open(server_config.is_open_url);
+    res.send(JSON.stringify({ is_open: quiz_open })); 
 });
 
 app.get('/get-question', (req, res) => {
@@ -71,19 +108,24 @@ app.get('/get-question', (req, res) => {
         return;
     }
     const question = questions[session_data.question_no];
+    session_data.is_new_question = session_data.is_new_question ?? true;
+    if (session_data.is_new_question) {
+        session_data.timer_start = Date.now();
+    }
     const send_data = {
         "question": question.question,
         "options": question.options,
-        "time_left": time_per_question - time_grace
-    }
-    if (session_data.is_new_question) {
-        session_data.timer_start = Date.now();
+        "time_left": (time_per_question - time_grace) + (session_data.timer_start - Date.now())
     }
     session_data.is_new_question = false;
     res.send(JSON.stringify(send_data));
 });
 
 app.use(express.static('public'));
+
+app.get('*', (req, res) => {
+    res.status(404).send('Not Found');
+});
 
 app.post('/register-user', (req, res) => {
     const user = req.body;
