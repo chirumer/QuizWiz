@@ -20,6 +20,7 @@
     "express": "^4.17.1",
     "express-session": "^1.17.2",
     "mongoose": "^5.12.13",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "pug": "^3.0.2"
   }
 }

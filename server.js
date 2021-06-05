@@ -42,6 +42,7 @@ app.use(session({
     }
 }));
 app.use(express.json());
+app.set('view engine', 'pug');
 
 app.get('/', (req, res) => {
     res.redirect('/home');
@@ -102,6 +103,30 @@ app.use('/results', (req, res, next) => {
 	return;
     }
     next();
+});
+
+app.get('/results', (req, res, next) => {
+    const total_no_questions = no_of_questions;
+    let answers_correct=0, questions_answered=0, time_taken=0;
+
+    req.session.answers.forEach((answer, index) => {
+        if (answer != -1) {
+            questions_answered++;
+        }
+        if (answer == questions[index]['answer-index']) {
+            answers_correct++;
+        }
+    });
+    req.session.times_taken.forEach(time => {
+        time_taken += time;
+    });
+
+    res.render(path.join(__dirname, '/public/results/index.pug'), {
+        questions_answered,
+        answers_correct,
+        total_no_questions,
+        time_taken
+    });
 });
 
 pages.forEach(page => {
