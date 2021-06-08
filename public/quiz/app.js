@@ -1,5 +1,6 @@
 (async function(){
 
+let question_no = -1;
 let timer_ID;
 
 const question_ele = document.getElementById('question');
@@ -34,15 +35,19 @@ submit_button.addEventListener('click', async () => {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ answer: selected_answer })
+        body: JSON.stringify({ answer: selected_answer, question_no })
     });
 
     if (!response.ok) {
         console.log('could not submit answer');
     }
 
-    const { is_timeout } = await response.json();
-    if (is_timeout) {
+    const data = await response.json();
+
+    if (data.lost_sync) {
+	console.log('question was out of sync');
+    }
+    else if (data.is_timeout) {
         alert('this question marked as timed out');
     }
     await load_question();
@@ -62,8 +67,9 @@ async function load_question() {
         window.location.assign('/results');
         return;
     }
+    question_no = data.question_no
 
-    question_ele.textContent = data.question;
+    question_ele.textContent = `(${question_no+1}): ` + data.question;
     timer_count_ele.textContent = 'undefined'; // implement later
 
     options_area_ele.textContent = '';
