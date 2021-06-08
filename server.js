@@ -163,6 +163,7 @@ app.get('/get-question', (req, res) => {
     }
     const send_data = {
         "question": question.question,
+	"question_no": session_data.question_no,
         "options": question.options,
         "time_left": (time_per_question - time_grace) + (session_data.timer_start - Date.now())
     }
@@ -192,6 +193,11 @@ app.post('/register-user', async (req, res) => {
 });
 
 app.post('/submit-answer', async (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    if (req.body.question_no != req.session.question_no) {
+	res.send(JSON.stringify({ lost_sync: true }));
+	return; // user question out of sync
+    }
     const user_answer = req.body.answer;
     req.session.answers = req.session.answers ?? Array(no_of_questions).fill(-1);
     req.session.times_taken = req.session.times_taken ?? Array(no_of_questions).fill(-1);
@@ -212,7 +218,6 @@ app.post('/submit-answer', async (req, res) => {
 
     req.session.is_new_question = true;
 
-    res.setHeader('Content-Type', 'application/json');
     res.send(JSON.stringify({ is_timeout }));
 });
 
