@@ -26,7 +26,8 @@ const participant_schema = new Schema({
     answers: [Number],
     times_taken: [Number],
     no_correct: Number,
-    secret: Number
+    secret: Number,
+    time_taken: Number
 });
 const Participant = mongoose.model('participants', participant_schema);
 
@@ -144,18 +145,16 @@ app.get('/leaderboard', async (req, res, next) => {
     const limit = 100;
 
     const top_users = await Participant.find()
-	.sort({ no_correct: 'desc', time_taken: 'asc' })
+	.sort([['no_correct', -1], ['time_taken', 1]])
 	.limit(limit);
 
     users = []
     top_users.forEach(user => {
-        let time_taken = 0;
-        user.times_taken.forEach(time => {
-            if (time_taken != -1) {
-                time_taken += time;
-            }
-        });
-        users.push({ 'name': user.name, 'no_correct': user.no_correct, time_taken });
+        users.push({
+		'name': user.name, 
+		'no_correct': user.no_correct, 
+		'time_taken': user.time_taken
+	});
     });
     
     res.render(path.join(__dirname, '/public/leaderboard/index.pug'), {
@@ -223,7 +222,8 @@ app.post('/register-user', async (req, res) => {
 	answers: Array(no_of_questions).fill(-1),
 	times_taken: Array(no_of_questions).fill(-1),
 	no_correct: 0,
-	secret: req.session.secret
+	secret: req.session.secret,
+	time_taken: 0
     });
     req.session.db_id = data._id;
 
@@ -240,12 +240,14 @@ app.post('/submit-answer', async (req, res) => {
     req.session.answers = req.session.answers ?? Array(no_of_questions).fill(-1);
     req.session.times_taken = req.session.times_taken ?? Array(no_of_questions).fill(-1);
     req.session.no_correct = req.session.no_correct ?? 0;
+    req.session.time_taken = req.session.time_taken ?? 0;
     const time_taken = Date.now() - req.session.timer_start;
     const is_timeout = time_taken > time_per_question; 
     if (!is_timeout) { 
         req.session.answers[req.session.question_no] = user_answer;
         req.session.times_taken[req.session.question_no] = time_taken;
 
+	req.session.time_taken += time_taken;
 	if (
 		user_answer 
 		== 
@@ -259,7 +261,8 @@ app.post('/submit-answer', async (req, res) => {
     }, {
 	answers: req.session.answers,
 	times_taken: req.session.times_taken,
-	no_correct: req.session.no_correct
+	no_correct: req.session.no_correct,
+	time_taken: req.session.time_taken
     });
 
     ++req.session.question_no;
