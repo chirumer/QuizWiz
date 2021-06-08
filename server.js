@@ -75,6 +75,18 @@ quiz_pages.forEach(page => {
     });
 });
 
+app.use('/instructions', (req, res, next) => {
+    if (req.session.in_quiz) {
+	res.redirect('/quiz');
+	return;
+    }
+    else if (req.session.user != undefined && !req.session.in_quiz) {
+	res.redirect('/results');
+	return;
+    }
+    next();
+});
+
 app.use('/registration', (req, res, next) => {
     if (req.session.in_quiz) {
 	res.redirect('/quiz');
