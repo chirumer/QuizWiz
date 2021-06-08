@@ -140,6 +140,29 @@ app.get('/results', (req, res, next) => {
     });
 });
 
+app.get('/leaderboard', async (req, res, next) => {
+    const limit = 100;
+
+    const top_users = await Participant.find()
+	.sort({ no_correct: 'desc', time_taken: 'asc' })
+	.limit(limit);
+
+    users = []
+    top_users.forEach(user => {
+        let time_taken = 0;
+        user.times_taken.forEach(time => {
+            if (time_taken != -1) {
+                time_taken += time;
+            }
+        });
+        users.push({ 'name': user.name, 'no_correct': user.no_correct, time_taken });
+    });
+    
+    res.render(path.join(__dirname, '/public/leaderboard/index.pug'), {
+        users
+    });
+});
+
 pages.forEach(page => {
     app.get('/'+page, (req, res) => {
 	res.sendFile(path.join(__dirname, '/public/'+page+'/index.html'));
