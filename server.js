@@ -25,7 +25,8 @@ const participant_schema = new Schema({
     },
     answers: [Number],
     times_taken: [Number],
-    no_correct: Number
+    no_correct: Number,
+    secret: Number
 });
 const Participant = mongoose.model('participants', participant_schema);
 
@@ -155,7 +156,7 @@ app.get('/get-question', (req, res) => {
         res.send(JSON.stringify({ is_over: true }));
         return;
     }
-    const question = questions[session_data.question_no];
+    const question = seeded_shuffle(questions, req.session.secret)[session_data.question_no];
     session_data.is_new_question = session_data.is_new_question ?? true;
     if (session_data.is_new_question) {
         session_data.timer_start = Date.now();
@@ -180,12 +181,14 @@ app.post('/register-user', async (req, res) => {
     const user = req.body;
     req.session.user = user;
     req.session.in_quiz = true;
+    req.session.secret = Math.floor(Math.random() * 10000);
 
     const data = await Participant.create({
 	name: user.name,
 	answers: Array(no_of_questions).fill(-1),
 	times_taken: Array(no_of_questions).fill(-1),
-	no_correct: 0
+	no_correct: 0,
+	secret: req.session.secret
     });
     req.session.db_id = data._id;
 
@@ -208,7 +211,11 @@ app.post('/submit-answer', async (req, res) => {
         req.session.answers[req.session.question_no] = user_answer;
         req.session.times_taken[req.session.question_no] = time_taken;
 
-	if (user_answer == questions[req.session.question_no]['answer-index']) {
+	if (
+		user_answer 
+		== 
+		seeded_shuffle(questions, req.session.secret)[req.session.question_no]['answer-index']
+	) {
 	    ++req.session.no_correct;
 	}
     }
@@ -237,6 +244,28 @@ async function is_open(url) {
     const response = await fetch(url);
     const { open_at, close_at } = await response.json();
     return Date.now() >= open_at && Date.now() < close_at;
+}
+
+function seeded_shuffle(arr, seed) {
+    arr = arr.slice();
+    function srand(seed) {
+	let num = seed;
+	return () => (num = num * 16807 % 2147483647);
+    }
+    const rand = srand(seed);
+    const rand_limits = (lower, upper) => rand() % (upper-lower+1) + lower;
+
+    for (let last_index = arr.length - 1; last_index > 0; --last_index) {
+	const selected_index = rand_limits(0, last_index);
+	if (selected_index != last_index) {
+	    [
+		arr[selected_index], arr[last_index]
+	    ] = [
+		arr[last_index], arr[selected_index]
+	    ];
+	}
+    }
+    return arr;
 }
 
 })();
