@@ -24,7 +24,8 @@ const participant_schema = new Schema({
 	required: true
     },
     answers: [Number],
-    times_taken: [Number]
+    times_taken: [Number],
+    no_correct: Number
 });
 const Participant = mongoose.model('participants', participant_schema);
 
@@ -109,9 +110,6 @@ app.get('/results', (req, res, next) => {
         if (answer != -1) {
             questions_answered++;
         }
-        if (answer == questions[index]['answer-index']) {
-            answers_correct++;
-        }
     });
     req.session.times_taken.forEach(time => {
         if (time_taken != -1) {
@@ -119,6 +117,7 @@ app.get('/results', (req, res, next) => {
 	}
     });
     time_taken = Math.round(time_taken/1000)
+    answers_correct = req.session.no_correct;
 
     res.render(path.join(__dirname, '/public/results/index.pug'), {
         questions_answered,
@@ -185,7 +184,8 @@ app.post('/register-user', async (req, res) => {
     const data = await Participant.create({
 	name: user.name,
 	answers: Array(no_of_questions).fill(-1),
-	times_taken: Array(no_of_questions).fill(-1)
+	times_taken: Array(no_of_questions).fill(-1),
+	no_correct: 0
     });
     req.session.db_id = data._id;
 
@@ -201,17 +201,23 @@ app.post('/submit-answer', async (req, res) => {
     const user_answer = req.body.answer;
     req.session.answers = req.session.answers ?? Array(no_of_questions).fill(-1);
     req.session.times_taken = req.session.times_taken ?? Array(no_of_questions).fill(-1);
+    req.session.no_correct = req.session.no_correct ?? 0;
     const time_taken = Date.now() - req.session.timer_start;
     const is_timeout = time_taken > time_per_question; 
     if (!is_timeout) { 
         req.session.answers[req.session.question_no] = user_answer;
         req.session.times_taken[req.session.question_no] = time_taken;
+
+	if (user_answer == questions[req.session.question_no]['answer-index']) {
+	    ++req.session.no_correct;
+	}
     }
     await Participant.updateOne({
 	_id: req.session.db_id
     }, {
 	answers: req.session.answers,
-	times_taken: req.session.times_taken
+	times_taken: req.session.times_taken,
+	no_correct: req.session.no_correct
     });
 
     ++req.session.question_no;
