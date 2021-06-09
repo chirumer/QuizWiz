@@ -61,6 +61,7 @@ const pages = [
     ...quiz_pages,
     'home',
     'instructions',
+    'answers',
     'closed',
     'leaderboard',
     '404'
@@ -74,6 +75,16 @@ quiz_pages.forEach(page => {
         }
         res.redirect('/closed');
     });
+});
+
+app.use('/answers', async (req, res, next) => {
+    const response = await fetch(server_config.quiz_timing_url);
+    const { close_at } = await response.json();
+    if (Date.now() < close_at) {
+        res.redirect('/');
+        return;
+    }
+    next();
 });
 
 app.use('/instructions', (req, res, next) => {
@@ -141,7 +152,7 @@ app.get('/results', (req, res, next) => {
     });
 });
 
-app.get('/leaderboard', async (req, res, next) => {
+app.get('/leaderboard', async (req, res) => {
     const limit = 100;
 
     const top_users = await Participant.find()
@@ -160,6 +171,17 @@ app.get('/leaderboard', async (req, res, next) => {
     res.render(path.join(__dirname, '/public/leaderboard/index.pug'), {
         users
     });
+});
+
+app.get('/answers', (req, res) => {
+    queries = []
+    questions.forEach(question => {
+        queries.push({ 
+            question: question.question, 
+            answer: question.options[question['answer-index']]
+        });
+    });
+    res.render(path.join(__dirname, '/public/answers/index.pug'), { queries });
 });
 
 pages.forEach(page => {

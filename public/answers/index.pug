@@ -1,0 +1,16 @@
+doctype html
+head
+    meta(charset='UTF-8')
+    meta(http-equiv='X-UA-Compatible' content='IE=edge')
+    meta(name='viewport' content='width=device-width, initial-scale=1.0')
+    title results
+    link(rel='stylesheet', href='/results/style.css')
+table
+    tr
+        th Question
+        th Answer
+
+    each query in queries
+        tr
+            td= query.question
+            td= query.answer
