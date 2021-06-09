@@ -220,7 +220,7 @@ app.get('/get-question', (req, res) => {
     const send_data = {
         "question": question.question,
 	"question_no": session_data.question_no,
-        "options": question.options,
+        "options": seeded_shuffle(question.options, session_data.secret + session_data.question_no),
         "time_left": (time_per_question - time_grace) + (session_data.timer_start - Date.now())
     }
     session_data.is_new_question = false;
@@ -269,11 +269,14 @@ app.post('/submit-answer', async (req, res) => {
         req.session.answers[req.session.question_no] = user_answer;
         req.session.times_taken[req.session.question_no] = time_taken;
 
+	const question = seeded_shuffle(questions, req.session.secret)[req.session.question_no];
 	req.session.time_taken += time_taken;
 	if (
-		user_answer 
+		question.options[question['answer-index']]
 		== 
-		seeded_shuffle(questions, req.session.secret)[req.session.question_no]['answer-index']
+	    	seeded_shuffle(
+		    question.options, req.session.secret + req.session.question_no
+		)[user_answer]
 	) {
 	    ++req.session.no_correct;
 	}
