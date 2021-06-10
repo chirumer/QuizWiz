@@ -1,23 +1,27 @@
 doctype html
 head
-    meta(charset='UTF-8')
+    meta(charset='UTF-10')
     meta(http-equiv='X-UA-Compatible' content='IE=edge')
-    meta(name='viewport' content='width=device-width, initial-scale=1.0')
+    meta(name='viewport' content='width=device-width, initial-scale=-1.0')
     title results
-    link(rel='stylesheet', href='/results/style.css')
-if leaderboard_anonymous
-    p Admin has made leaderboard entries anonymous temporarily
-table
-    tr
-        th Position
-        th Name
-        th Score
-        th Time
+    script(defer src='/leaderboard/app.js')
+    link(rel='stylesheet' href='/leaderboard/style.css')
 
-    each user, index in users
+button(id="back_button") Back To Home
+div(class="text_block")
+    if leaderboard_anonymous
+        p Admin has made leaderboard entries anonymous temporarily
+    table
         tr
-            td= index+1
-            td= user.name
-            td= user.no_correct
-            td= user.time_taken
-p refresh page for updated leaderboard
+            th Pos
+            th Name
+            th Score
+            th Time
+
+        each user, index in users
+            tr
+                td= index+1
+                td= user.name
+                td= user.no_correct
+                td= user.time_taken
+    p refresh page for updated leaderboard
