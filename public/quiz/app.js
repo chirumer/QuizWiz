@@ -63,6 +63,10 @@ async function load_question() {
     }
     const data = await response.json();
 
+    if (data.quiz_closed) {
+	window.location.assign('/closed');
+    }
+
     if (data.is_over) {
         window.location.assign('/results');
         return;
