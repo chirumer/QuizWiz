@@ -70,3 +70,19 @@ button {
 button:hover {
     background-color: rgb(252, 238, 167, 0.7);
 }
+
+@media (max-width:500px) {
+
+.text_block > h1 {
+    font-size: 3rem;
+}
+
+.text_block > div {
+    font-size: 1rem
+}
+
+button {
+    font-size: 1rem;
+}
+    
+}
