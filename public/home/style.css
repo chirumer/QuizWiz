@@ -12,7 +12,8 @@ body, html {
 
 body {
     background-image: url("coin.png");
-    background-repeat: repeat;
+    background-color: #ffe165;
+    background-repeat: space space;
     background-size: 10rem auto;
     border: 2rem ridge rgb(236, 190, 47, 0.6);
     box-sizing: border-box;
