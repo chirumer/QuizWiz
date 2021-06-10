@@ -9,8 +9,34 @@
     <script defer src="/instructions/app.js"></script>
 </head>
 <body>
-    <p> Instructions: ... </p>
-    <p id="quiz_time_display">undefined</p>
-    <button id="start_button"> Start </button>
+    <main class="display_content">
+	<div class="text_block">
+	    <h1> Instructions </h1>
+	    <ul>
+		<li> Quiz opens at 6:15pm </li>
+		<li> Quiz closes at 7:30pm </li>
+		<li> Every question has a timer </li>
+		<li> Only those registered will be considered </li>
+		<li> Use registered email-id and name </li>
+		<li> Register at 
+		    <a  target="_blank"
+			href=https://www.cryptonger.com/registration-form> cryptonger</a>
+		    if you have not already
+		</li>
+	    </ul>
+	    <h1> Miscellaneous </h1>
+	    <ul>
+		<li> source code available at: 
+		    <a target="_blank"
+		       href="https://www.github.com/chirumer/QuizWiz"> github</a>
+		<li> Progress saved after every question </li>
+		<li> timer displays up to 5 seconds faster than server timer </li>
+	    </ul>
+	</div>
+	<div class="action_block">
+	    <p id="quiz_time_display">undefined</p>
+	    <button id="start_button"> Start </button>
+	</div>
+    </main>
 </body>
 </html>
