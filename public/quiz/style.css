@@ -1,0 +1,66 @@
+@font-face {
+  font-family: "Montserrat";
+  src: url("../assets/Montserrat.otf");
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%
+}
+
+body {
+    background-image: url("../assets/coin.png");
+    background-color: #ffe165;
+    background-repeat: space space;
+    background-size: 10rem auto;
+    border: 2rem ridge rgb(236, 190, 47, 0.6);
+    box-sizing: border-box;
+}
+
+main {
+    background-color: rgb(256, 256, 256, 0.7);
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    padding: 10px;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items:center;
+    font-size: 2rem;
+}
+
+ul {
+    list-style-type: none;
+    font-family: sans-serif;
+}
+
+li {
+    margin: 2rem;
+}
+
+button {
+    box-shadow: 5px 5px 20px;
+    border-radius: 0px;
+    font-size: 2rem;
+    min-width: 1px;
+    max-width: 100%;
+    border: 1rem solid rgb(252, 238, 167);
+    font-family: 'Montserrat', sans-serif;
+    background-color: rgb(256, 256, 256, 0.7);
+}
+
+button:hover {
+    background-color: rgb(252, 238, 167, 0.7);
+}
+
+.timer {
+    background-color: rgb(256, 256, 256, 0.7);
+    border: 1rem solid rgb(252, 238, 167);
+    padding: 1rem;
+}
+
+@media (max-width:400px) {
+body {
+    border: none;
+}
+}
