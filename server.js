@@ -203,8 +203,12 @@ app.get('/get-quiz-timing', async(req, res) => {
     res.send(JSON.stringify({ open_at, close_at }));
 });
 
-app.get('/get-question', (req, res) => {
+app.get('/get-question', async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
+    const quiz_open = await is_open(server_config.quiz_timing_url);
+    if (!quiz_open) {
+	res.send(JSON.stringify({ quiz_closed }));
+    }
     const session_data = req.session;
     session_data.question_no = session_data.question_no ?? 0;
     if (!(session_data.question_no < no_of_questions)) {
