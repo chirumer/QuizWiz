@@ -163,6 +163,10 @@ app.get('/results', (req, res, next) => {
 app.get('/leaderboard', async (req, res) => {
     const limit = 100;
 
+    const leaderboard_anonymous = await is_leaderboard_anonymous(
+	server_config.quiz_timing_url
+    );
+
     const top_users = await Participant.find()
 	.sort([['no_correct', -1], ['time_taken', 1]])
 	.limit(limit);
@@ -175,9 +179,17 @@ app.get('/leaderboard', async (req, res) => {
 		'time_taken': user.time_taken
 	});
     });
+
+    if (leaderboard_anonymous) {
+	for (user of users) {
+	    user.name = 'hidden';
+	    user.no_correct = 'hidden';
+	    user.time_taken = 'hidden';
+	}
+    }
     
     res.render(path.join(__dirname, '/public/leaderboard/index.pug'), {
-        users
+        leaderboard_anonymous, users
     });
 });
 
@@ -325,6 +337,12 @@ async function is_website_closed(url) {
     const response = await fetch(url);
     const { is_closed } = await response.json();
     return is_closed;
+}
+
+async function is_leaderboard_anonymous(url) {
+    const response = await fetch(url);
+    const { leaderboard_anonymous } = await response.json();
+    return leaderboard_anonymous;
 }
 
 function seeded_shuffle(arr, seed) {
