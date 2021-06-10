@@ -207,11 +207,7 @@ app.get('/get-question', async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     const quiz_open = await is_open(server_config.quiz_timing_url);
     if (!quiz_open) {
-<<<<<<< HEAD
 	res.send(JSON.stringify({ quiz_closed: true }));
-=======
-	res.send(JSON.stringify({ quiz_closed }));
->>>>>>> 250b9cc28343f782cdb8da06c6ceeb7be25a4449
     }
     const session_data = req.session;
     session_data.question_no = session_data.question_no ?? 0;
