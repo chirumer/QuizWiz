@@ -23,6 +23,11 @@ const participant_schema = new Schema({
 	lowercase: true,
 	required: true
     },
+    email: {
+	type: String,
+	lowercase: true,
+	required: true
+    },
     answers: [Number],
     times_taken: [Number],
     no_correct: Number,
@@ -265,6 +270,7 @@ app.post('/register-user', async (req, res) => {
 
     const data = await Participant.create({
 	name: user.name,
+	email: user.email,
 	answers: Array(no_of_questions).fill(-1),
 	times_taken: Array(no_of_questions).fill(-1),
 	no_correct: 0,

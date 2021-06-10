@@ -26,7 +26,7 @@ answers_button.addEventListener('click', () => {
 	window.location.assign('/answers');
     }
     else {
-	alert('answers available only after quiz closes');
+	window.alert('answers available only after quiz closes');
     }
 });
 
