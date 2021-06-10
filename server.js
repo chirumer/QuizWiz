@@ -47,6 +47,14 @@ app.use(session({
 app.use(express.json());
 app.set('view engine', 'pug');
 
+app.use('*', async (req, res, next) => {
+    if (await is_website_closed(server_config.quiz_timing_url)) {
+	res.send('Admin has closed the website temporarily');
+	return;
+    }
+    next();
+});
+
 app.get('/', (req, res) => {
     res.redirect('/home');
 });
@@ -311,6 +319,12 @@ async function is_open(url) {
     const response = await fetch(url);
     const { open_at, close_at } = await response.json();
     return Date.now() >= open_at && Date.now() < close_at;
+}
+
+async function is_website_closed(url) {
+    const response = await fetch(url);
+    const { is_closed } = await response.json();
+    return is_closed;
 }
 
 function seeded_shuffle(arr, seed) {
