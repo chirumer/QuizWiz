@@ -233,6 +233,7 @@ app.get('/get-question', async (req, res) => {
     const quiz_open = await is_open(server_config.quiz_timing_url);
     if (!quiz_open) {
 	res.send(JSON.stringify({ quiz_closed: true }));
+        return;
     }
     const session_data = req.session;
     session_data.question_no = session_data.question_no ?? 0;

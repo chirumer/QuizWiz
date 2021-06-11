@@ -15,7 +15,7 @@ start_button.addEventListener('click', async () => {
     }
     const data = await response.json();
     if (!data.is_open) {
-        window.alert('quiz not yet open');
+        window.alert('quiz not open');
         return;
     }
     window.location.assign('/registration')
