@@ -1,0 +1,5 @@
+{
+    "time_per_question" : 25000,
+    "time_grace" : 5000,
+    "quiz_duration" : 10800000
+}
